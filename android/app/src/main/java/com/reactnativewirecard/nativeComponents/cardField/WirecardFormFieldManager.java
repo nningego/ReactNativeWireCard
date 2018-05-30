@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.SimpleViewManager;
@@ -29,13 +28,11 @@ import de.wirecard.paymentsdk.models.WirecardExtendedCardPayment;
 
 
 public class WirecardFormFieldManager
-        extends SimpleViewManager<LinearLayout> implements LifecycleEventListener {
-
+        extends SimpleViewManager<LinearLayout> {
     private static final String REACT_CLASS = "WirecardFormField";
     private static final int COMMAND_CREATE = 1;
     private ThemedReactContext mContext;
     private WirecardInputFormsStateManager wirecardInputFormsStateManager;
-    private WirecardClient wirecardClient;
     private TextView stateLabel;
 
     @Override
@@ -53,17 +50,8 @@ public class WirecardFormFieldManager
     }
 
     @Override
-    public void onHostResume() {
-        wirecardInputFormsStateManager.startReceivingEvents();
-    }
-
-    @Override
-    public void onHostPause() {
-        wirecardInputFormsStateManager.stopReceivingEvents();
-    }
-
-    @Override
-    public void onHostDestroy() {
+    public void onDropViewInstance(LinearLayout view) {
+        super.onDropViewInstance(view);
         wirecardInputFormsStateManager.stopReceivingEvents();
     }
 
@@ -88,7 +76,7 @@ public class WirecardFormFieldManager
     private void createFragment() {
         String environment = WirecardEnvironment.TEST.getValue();
         try {
-            wirecardClient = WirecardClientBuilder.newInstance(mContext.getCurrentActivity(), environment)
+            WirecardClientBuilder.newInstance(mContext.getCurrentActivity(), environment)
                     .setRequestTimeout(60)
                     .build();
         } catch (WirecardException exception) {
@@ -120,6 +108,7 @@ public class WirecardFormFieldManager
 
         wirecardInputFormsStateManager =
                 new WirecardInputFormsStateManager(mContext.getCurrentActivity(), wirecardInputFormsStateChangedListener);
+        wirecardInputFormsStateManager.startReceivingEvents();
 
     }
 
