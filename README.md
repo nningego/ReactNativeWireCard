@@ -18,5 +18,6 @@ $ react-native run-android
 
 
 TODO:
-- Add Event Listener
+- ~~Add Event Listener~~
+- Add Event Listener on react side
 - Style Card form
