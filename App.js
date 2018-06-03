@@ -13,6 +13,8 @@ import {
   UIManager,
   findNodeHandle,
 } from 'react-native';
+import { DeviceEventEmitter } from 'react-native';
+
 
 const fragmentIFace = {
   name: 'Fragment',
@@ -23,7 +25,23 @@ const fragmentIFace = {
 
 const CardFieldNative = requireNativeComponent('WirecardFormField', fragmentIFace);
 
+const subscribeForNativeEvents = (eventID, callback) => {
+  DeviceEventEmitter.addListener(eventID, callback);
+};
+
+const doValidCardStuff = () => (
+  <Text style={styles.submit}>YOU CAN SUBMIT PAYMENT NOW</Text>
+);
+
 export default class App extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state  = {
+      cardValid: false,
+    }
+  }
+
   create = () => {
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(this.fragment),
@@ -34,6 +52,14 @@ export default class App extends React.Component {
 
   componentDidMount() {
     this.create();
+
+    subscribeForNativeEvents('nativeCardStatus', (event) => {
+      if(event.cardFieldStatus === 'CARD_VALID'){
+        this.setState({
+          cardValid: true,
+        });
+      }
+    });
   }
 
   render() {
@@ -48,6 +74,7 @@ export default class App extends React.Component {
             {...this.props}
             style={[{ flex: 1, width: '100%' }]}
           />
+        {this.state.cardValid && doValidCardStuff()}
       </View>
     );
   }
@@ -56,6 +83,7 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
@@ -64,6 +92,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
     margin: 10,
+  },
+  submit: {
+    fontSize: 20,
+    textAlign: 'center',
+    marginBottom: 80,
   },
   instructions: {
     textAlign: 'center',

@@ -7,8 +7,11 @@ import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.common.MapBuilder;
+import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.reactnativewirecard.R;
@@ -18,7 +21,6 @@ import java.util.Map;
 
 import de.wirecard.paymentsdk.BuildConfig;
 import de.wirecard.paymentsdk.WirecardCardFormFragment;
-import de.wirecard.paymentsdk.WirecardClient;
 import de.wirecard.paymentsdk.WirecardClientBuilder;
 import de.wirecard.paymentsdk.WirecardEnvironment;
 import de.wirecard.paymentsdk.WirecardException;
@@ -64,6 +66,14 @@ public class WirecardFormFieldManager
 
     }
 
+    private RCTDeviceEventEmitter emitter() {
+        return mContext.getJSModule(RCTDeviceEventEmitter.class);
+    }
+
+    private void pushPayload(String event, WritableMap payload) {
+        emitter().emit(event, payload);
+    }
+
     @Override
     public void receiveCommand(LinearLayout root, int commandId, @javax.annotation.Nullable ReadableArray args) {
         switch (commandId) {
@@ -97,12 +107,11 @@ public class WirecardFormFieldManager
                 .replace(R.id.container, wirecardCardFormFragment)
                 .commitNow();
 
-        //TODO
-        stateLabel = (TextView) mContext.getCurrentActivity().findViewById(R.id.state);
+        stateLabel = mContext.getCurrentActivity().findViewById(R.id.state);
         WirecardInputFormsStateChangedListener wirecardInputFormsStateChangedListener = new WirecardInputFormsStateChangedListener() {
             @Override
             public void onStateChanged(int code) {
-                updateStateLabel(code);
+                mapCardFieldStates(code);
             }
         };
 
@@ -112,7 +121,7 @@ public class WirecardFormFieldManager
 
     }
 
-    private void updateStateLabel(int code) {
+    private void mapCardFieldStates(int code) {
         String state = "";
         switch (code) {
             case WirecardInputFormsStateChangedListener.CARD_NUMBER_FORM_FOCUS_GAINED:
@@ -174,6 +183,9 @@ public class WirecardFormFieldManager
                 break;
 
         }
+        WritableMap data = Arguments.createMap();
+        data.putString("cardFieldStatus", state);
+        pushPayload("nativeCardStatus", data);
         stateLabel.setText(state);
     }
 
