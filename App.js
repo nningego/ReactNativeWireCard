@@ -12,9 +12,8 @@ import {
   View,
   UIManager,
   findNodeHandle,
+  DeviceEventEmitter,
 } from 'react-native';
-import { DeviceEventEmitter } from 'react-native';
-
 
 const fragmentIFace = {
   name: 'Fragment',
@@ -37,7 +36,7 @@ export default class App extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state  = {
+    this.state = {
       cardValid: false,
     }
   }
@@ -54,10 +53,10 @@ export default class App extends React.Component {
     this.create();
 
     subscribeForNativeEvents('nativeCardStatus', (event) => {
-      if(event.cardFieldStatus === 'CARD_VALID'){
-        this.setState({
-          cardValid: true,
-        });
+      if (event.cardFieldStatus === 'CARD_VALID') {
+        this.setState({ cardValid: true });
+      } else {
+        this.setState({ cardValid: false });
       }
     });
   }
