@@ -150,7 +150,7 @@ dependencies {
         exclude module: 'stax-api'
         exclude module: 'xpp3'
     }
-    implementation 'com.github.wirecard:paymentSDK-Android:2.15.0-cardScannerDisabled'
+    implementation 'com.github.wirecard:paymentSDK-Android:2.16.0-cardScannerDisabled'
     //    paymentSdk -------------
 }
 

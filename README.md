@@ -16,8 +16,10 @@ Start android App
 $ react-native run-android
 ```
 
+Sample card:
+https://document-center.wirecard.com/display/PTD/Status+Code+Test
 
 TODO:
 - ~~Add Event Listener~~
-- Add Event Listener on react side
-- Style Card form
+- ~~Add Event Listener on react side~~
+- ~~Style Card form~~

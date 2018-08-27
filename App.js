@@ -13,6 +13,7 @@ import {
   UIManager,
   findNodeHandle,
   DeviceEventEmitter,
+  Button,
 } from 'react-native';
 
 const fragmentIFace = {
@@ -21,6 +22,7 @@ const fragmentIFace = {
     ...View.propTypes,
   },
 };
+import submitPayment from './EmbeddedCardField.submitPayment';
 
 const CardFieldNative = requireNativeComponent('WirecardFormField', fragmentIFace);
 
@@ -28,16 +30,14 @@ const subscribeForNativeEvents = (eventID, callback) => {
   DeviceEventEmitter.addListener(eventID, callback);
 };
 
-const doValidCardStuff = () => (
-  <Text style={styles.submit}>YOU CAN SUBMIT PAYMENT NOW</Text>
-);
-
 export default class App extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
       cardValid: false,
+      success: false,
+      error: false,
     }
   }
 
@@ -61,6 +61,23 @@ export default class App extends React.Component {
     });
   }
 
+  submit = () => submitPayment()
+    .then((response) => {
+      console.log('response', response);
+      this.setState({ success: true });
+    })
+    .catch((error) => {
+      console.log('error', error);
+      this.setState({ error: true });
+    });
+
+  doValidCardStuff = () => (
+    <Button
+      title="You can submit form now."
+      onPress={this.submit}
+      style={styles.submit}/>
+  );
+
   render() {
     return (
       <View style={styles.container}>
@@ -73,7 +90,9 @@ export default class App extends React.Component {
             {...this.props}
             style={[{ flex: 1, width: '100%' }]}
           />
-        {this.state.cardValid && doValidCardStuff()}
+        {this.state.success && <Text style={styles.instructions}>Success</Text>}
+        {this.state.error && <Text style={styles.instructions}>Error</Text>}
+        {this.state.cardValid && this.doValidCardStuff()}
       </View>
     );
   }
@@ -96,10 +115,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
     marginBottom: 80,
+    color: 'red',
   },
   instructions: {
     textAlign: 'center',
-    color: '#333333',
+    color: 'red',
     marginBottom: 5,
   },
 });
